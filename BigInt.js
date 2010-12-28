@@ -1,3 +1,5 @@
+// Wrap all functions to OO-style and close the scope by cho45
+(function () {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Big Integer Library v. 5.4
 // Created 2000, last modified 2009
@@ -6,7 +8,7 @@
 //
 // Version history:
 // v 5.4  3 Oct 2009
-//   - added "var i" to greaterShift() so i is not global. (Thanks to PŽter Szab— for finding that bug)
+//   - added "var i" to greaterShift() so i is not global. (Thanks to P?ter Szab? for finding that bug)
 //
 // v 5.3  21 Sep 2009
 //   - added randProbPrime(k) for probable primes
@@ -177,41 +179,41 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 //globals
-bpe=0;         //bits stored per array element
-mask=0;        //AND this with an array element to chop it down to bpe bits
-radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
+var bpe=0;         //bits stored per array element
+var mask=0;        //AND this with an array element to chop it down to bpe bits
+var radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
 
 //the digits for converting to different bases
-digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
+var digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
 
 //initialize the global variables
 for (bpe=0; (1<<(bpe+1)) > (1<<bpe); bpe++);  //bpe=number of bits in the mantissa on this platform
 bpe>>=1;                   //bpe=number of bits in one element of the array representing the bigInt
 mask=(1<<bpe)-1;           //AND the mask with an integer to get its bpe least significant bits
 radix=mask+1;              //2^bpe.  a single 1 bit to the left of the first bit of mask
-one=int2bigInt(1,1,1);     //constant used in powMod_()
+var one=int2bigInt(1,1,1);     //constant used in powMod_()
 
 //the following global variables are scratchpad memory to 
 //reduce dynamic memory allocation in the inner loop
-t=new Array(0);
-ss=t;       //used in mult_()
-s0=t;       //used in multMod_(), squareMod_() 
-s1=t;       //used in powMod_(), multMod_(), squareMod_() 
-s2=t;       //used in powMod_(), multMod_()
-s3=t;       //used in powMod_()
-s4=t; s5=t; //used in mod_()
-s6=t;       //used in bigInt2str()
-s7=t;       //used in powMod_()
-T=t;        //used in GCD_()
-sa=t;       //used in mont_()
-mr_x1=t; mr_r=t; mr_a=t;                                      //used in millerRabin()
-eg_v=t; eg_u=t; eg_A=t; eg_B=t; eg_C=t; eg_D=t;               //used in eGCD_(), inverseMod_()
-md_q1=t; md_q2=t; md_q3=t; md_r=t; md_r1=t; md_r2=t; md_tt=t; //used in mod_()
+var t=new Array(0);
+var ss=t;       //used in mult_()
+var s0=t;       //used in multMod_(), squareMod_() 
+var s1=t;       //used in powMod_(), multMod_(), squareMod_() 
+var s2=t;       //used in powMod_(), multMod_()
+var s3=t;       //used in powMod_()
+var s4=t; s5=t; //used in mod_()
+var s6=t;       //used in bigInt2str()
+var s7=t;       //used in powMod_()
+var T=t;        //used in GCD_()
+var sa=t;       //used in mont_()
+var mr_x1=t, mr_r=t, mr_a=t;                                      //used in millerRabin()
+var eg_v=t, eg_u=t, eg_A=t, eg_B=t, eg_C=t, eg_D=t;               //used in eGCD_(), inverseMod_()
+var md_q1=t, md_q2=t, md_q3=t, md_r=t, md_r1=t, md_r2=t, md_tt=t; //used in mod_()
 
-primes=t; pows=t; s_i=t; s_i2=t; s_R=t; s_rm=t; s_q=t; s_n1=t; 
-  s_a=t; s_r2=t; s_n=t; s_b=t; s_d=t; s_x1=t; s_x2=t, s_aa=t; //used in randTruePrime_()
+var primes=t, pows=t, s_i=t, s_i2=t, s_R=t, s_rm=t, s_q=t, s_n1=t, 
+    s_a=t, s_r2=t, s_n=t, s_b=t, s_d=t, s_x1=t, s_x2=t, s_aa=t; //used in randTruePrime_()
   
-rpprb=t; //used in randProbPrimeRounds() (which also uses "primes")
+var rpprb=t; //used in randProbPrimeRounds() (which also uses "primes")
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1501,5 +1503,139 @@ function mont_(x,y,n,np) {
     sub_(sa,n);
   copy_(x,sa);
 }
+
+// OO-style
+
+function BigInt () { this.init.apply(this, arguments) };
+BigInt.prototype = {
+	init: function (o) {
+		if (typeof(o) == 'string') {
+			o = o.replace(/^(0x|0b|0o|0|)/, '');
+			var base = {'0x':16,'0b':2,'0o':8,'0':8}[RegExp.$1] || 10;
+			this.bigInt = str2bigInt(o, base, 0, 0);
+			return;
+		} else {
+			this.bigInt = (typeof(o) == 'number') ? int2bigInt(o, 0, 0) :
+			              (o instanceof BigInt)   ? o.clone().bigInt:
+			              o;
+			return;
+		}
+	},
+
+	add : function (other) {
+		this.bigInt = (typeof(other) == 'number') ? addInt(this.bigInt, other) : add(this.bigInt, new BigInt(other).bigInt);
+		return this;
+	},
+
+	sub : function (other) {
+		this.bigInt = sub(this.bigInt, new BigInt(bigInt).bigInt);
+		return this;
+	},
+
+	mod : function (other) {
+		if (typeof(other) == 'number') {
+			this.bigInt = new BigInt(modInt(this.bigInt, other));
+			return this;
+		} else {
+			this.bigInt = mod(this.bigInt, new BigInt(other).bigInt);
+			return this;
+		}
+	},
+
+	mul : function (other) {
+		this.bigInt = mult(this.bigInt, new BigInt(other).bigInt);
+		return this;
+	},
+
+	mulMod : function (other, n) {
+		this.bigInt = multMod(this.bigInt, new BigInt(other).bigInt, n);
+		return this;
+	},
+
+	powMod : function (other, n) {
+		this.bigInt = powMod(this.bigInt, new BigInt(other).bigInt, n);
+		return this;
+	},
+
+	div : function (other) {
+		if (typeof(other) == 'number') {
+			var remainder = divInt_(this.bigInt, other);
+			return remainder;
+		} else {
+			var q = new Array(0);
+			var r = new Array(0);
+			divide_(this.bigInt, new BigInt(other).bigInt, q, r);
+			this.bigInt = q;
+			return new this.constructor(r);
+		}
+	},
+
+	inverseMod : function (other) {
+		return (typeof(other) == 'number') ? inverseModInt(this.bigInt, other) : inverseMod(this.bigInt, new BigInt(other).bigInt);
+	},
+
+	equals : function (other) {
+		return (typeof(other) == 'number') ? equalsInt(this.bigInt, other) : equals(this.bigInt, new BigInt(other).bigInt);
+	},
+	
+	isZero : function () {
+		return isZero(this.bigInt);
+	},
+
+	isNegative : function () {
+		return negative(this.bigInt);
+	},
+
+	isPositive : function () {
+		return !isZero(this.bigInt) && !negative(this.bigInt);
+	},
+
+	millerRabin : function (other) {
+		return (typeof(other) == 'number') ? millerRabinInt(this.bigInt, other) : millerRabin(this.bigInt, new BigInt(other).bigInt);
+	},
+
+	gcd : function (other) {
+		GCD_(this.bigInt, new BigInt(other).bigInt);
+		return this;
+	},
+
+	greater : function (other) {
+		return greater(this.bigInt, new BigInt(other).bigInt);
+	},
+
+	greaterShift : function (other, n) {
+		return greater(this.bigInt, new BigInt(other).bigInt, n);
+	},
+
+	expand : function (n) {
+		return expand(this.bigInt, n);
+	},
+
+	bitSize : function () {
+		return bitSize(this.bigInt);
+	},
+
+	clone : function () {
+		return new BigInt(dup(this.bigInt));
+	},
+
+	dup   : function () {
+		return new BigInt(dup(this.bigInt));
+	},
+
+	toString : function (base) {
+		return bigInt2str(this.bigInt, base || 10);
+	},
+
+	valueOf : function () {
+		throw "You must use bigint functions instead of native operators";
+	}
+};
+
+var Global = (function () { return this })();
+Global.BigInt = BigInt;
+Global.BigInt.randBigInt = function () { return new BigInt(randBigInt.apply(arguments)) };
+Global.BigInt.random     = BigInt.randBigInt;
+})();
 
 
