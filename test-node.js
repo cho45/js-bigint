@@ -3,10 +3,12 @@
 var fs  = require('fs');
 var sys = require('sys');
 
-eval(fs.readFileSync('./BigInt.js', 'ascii'));
-eval(fs.readFileSync('./Base58.js', 'ascii'));
-
 // bigint
+console.log('bigint');
+eval(fs.readFileSync('./BigInt.js', 'ascii'));
+
+is(new BigInt('0xffffffff').toString(), '4294967295');
+is(new BigInt('0xffffffffffffffff').toString(), '18446744073709551615');
 
 is(new BigInt('0').add('1').toString(), '1');
 is(new BigInt('0').add('3').toString(), '3');
@@ -14,7 +16,28 @@ is(new BigInt('0').add(new BigInt('1')).toString(), '1');
 is(new BigInt('0').add(new BigInt('2')).toString(), '2');
 is(new BigInt('1').add(new BigInt('2')).toString(), '3');
 
+is(new BigInt('0').mul('1').toString(), '0');
+is(new BigInt('1').mul('1').toString(), '1');
+is(new BigInt('1').mul('2').toString(), '2');
+is(new BigInt('0').mul(new BigInt('1')).toString(), '0', 'mul with bigint');
+is(new BigInt('1').mul(new BigInt('1')).toString(), '1', 'mul with bigint');
+is(new BigInt('1').mul(new BigInt('2')).toString(), '2', 'mul with bigint');
+
+is(new BigInt('0xffffffff').mul('0xffffffff').toString(), '18446744065119617025');
+is(new BigInt('0xffffffff').add('0xffffffff').toString(), '8589934590');
+is(new BigInt('0xffffffff').sub('0xffffffff').toString(), '0');
+
+// does not support negative bigint...
+//is(new BigInt(-1).isNegative(), true, 'bigint(-1)');
+//is(new BigInt(-1).toString(), '-1', 'bigint(-1)');
+//is(new BigInt(1).mul(-1).isNegative(), true, 'bigint(1) * -1');
+//is(new BigInt(1).mul(-1).toString(), '-1', 'bigint(1) * -1');
+//is(new BigInt('-1').isNegative(), true, 'bigint(-1)');
+//is(new BigInt('-1').toString(), '-1', 'bigint(-1)');
+
 // base58
+console.log('base58');
+eval(fs.readFileSync('./Base58.js', 'ascii'));
 
 is(encodeBase58('0'), '1', 'encodeBase58 0 -> 1');
 is(decodeBase58('1'), '0', 'decodeBase58 1 -> 0');

@@ -1,5 +1,6 @@
 // Wrap all functions to OO-style and close the scope by cho45
 (function () {
+// http://www.leemon.com/crypto/BigInt.js
 ////////////////////////////////////////////////////////////////////////////////////////
 // Big Integer Library v. 5.4
 // Created 2000, last modified 2009
@@ -1510,9 +1511,12 @@ function BigInt () { this.init.apply(this, arguments) };
 BigInt.prototype = {
 	init: function (o) {
 		if (typeof(o) == 'string') {
-			o = o.replace(/^(0x|0b|0o|0|)/, '');
-			var base = {'0x':16,'0b':2,'0o':8,'0':8}[RegExp.$1] || 10;
+			o = o.replace(/^(-)?(0x|0b|0o|0|)/, '');
+			var neg  = RegExp.$1;
+			var qua  = RegExp.$2;
+			var base = {'0x':16,'0b':2,'0o':8,'0':8}[qua] || 10;
 			this.bigInt = str2bigInt(o, base, 0, 0);
+			if (neg) this.mul(-1);
 			return;
 		} else {
 			this.bigInt = (typeof(o) == 'number') ? int2bigInt(o, 0, 0) :
@@ -1528,7 +1532,7 @@ BigInt.prototype = {
 	},
 
 	sub : function (other) {
-		this.bigInt = sub(this.bigInt, new BigInt(bigInt).bigInt);
+		this.bigInt = sub(this.bigInt, new BigInt(other).bigInt);
 		return this;
 	},
 
@@ -1583,7 +1587,7 @@ BigInt.prototype = {
 	},
 
 	isNegative : function () {
-		return negative(this.bigInt);
+		return !!negative(trim(this.bigInt, 0));
 	},
 
 	isPositive : function () {
